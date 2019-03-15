@@ -1,19 +1,12 @@
 #pragma once
 #include <time.h>
 
-
-void GetNowTime()
+struct Timer
 {
-	time_t t;
-	t = time(NULL);
-	struct tm *lt;
-	int ii = time(&t);
-	printf("ii = %d\n", ii);
-	t = time(NULL);
-	lt = localtime(&t);
-	char nowtime[24];
-	memset(nowtime, 0, sizeof(nowtime));
-	strftime(nowtime, 24, "%Y-%m-%d %H:%M:%S", lt);
-	printf("nowtime = %s\n", nowtime);
-
-}
+	clock_t nowtime=0;
+	clock_t tick() {
+		clock_t delta = clock() - nowtime;
+		nowtime = clock();
+		return delta; 
+	}
+};

@@ -117,12 +117,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="core.h" />
+    <ClInclude Include="CPMCamera.h" />
+    <ClInclude Include="CPMGameObject.h" />
+    <ClInclude Include="CPMLight.h" />
+    <ClInclude Include="CPMRenderer.h" />
+    <ClInclude Include="CPMScene.h" />
     <ClInclude Include="matrix.h" />
-    <ClInclude Include="renderer.h" />
+    <ClInclude Include="CPMDevice.h" />
+    <ClInclude Include="render.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp" />
+    <ClCompile Include="CPMCamera.cpp" />
+    <ClCompile Include="CPMDevice.cpp" />
+    <ClCompile Include="CPMGameObject.cpp" />
+    <ClCompile Include="CPMLight.cpp" />
+    <ClCompile Include="CPMRenderer.cpp" />
+    <ClCompile Include="CPMScene.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,25 +1,37 @@
 #include <iostream>
-#include "renderer.h"
+#include "CPMDevice.h"
+#include "CPMRenderer.h"
+//#include "CPMScene.h"
+//#include "CPMGameObject.h"
 #include "utils.h"
 using namespace std;
 
 int main() {
 	const TCHAR *title = _T("Mini3d (software render tutorial) - Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
-
 	if (screen_init(800, 600, title))
 		return -1;
-	device_t state;
-	InitStateMachine(&state, 800, 600, screen_fb);
-	device_clear(&state, 0);
 	
-	for (int i = 0; i < 300; i++)
-		state.framebuffer[500][i] = 0;
-	screen_update();
+	Timer timer;
+	CPMDevice device(800, 600, screen_fb);
+	CPMScene scene;
+	CPMGameObject* tri=new CPMGameObject();
+	tri->InitAsTriangle();
+	scene.AddGameObject(tri);
+	CPMRenderer renderer(scene,device);
 
 	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
+		timer.tick();
 		screen_dispatch();
-		GetNowTime();
-		//Sleep(1);
+		device.Clear(0);
+		
+
+		renderer.Draw();
+		
+		screen_update();
+		int fps = 1000.0 / timer.tick();
+		bool res = SetWindowTextA(screen_handle, (LPCSTR)fps);
+		cout << "FPS: "<<fps << endl;
+		Sleep(1);
 	}
 	
 
