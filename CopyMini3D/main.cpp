@@ -1,8 +1,6 @@
 #include <iostream>
-#include "CPMDevice.h"
+//#include "CPMDevice.h"
 #include "CPMRenderer.h"
-//#include "CPMScene.h"
-//#include "CPMGameObject.h"
 #include "utils.h"
 using namespace std;
 

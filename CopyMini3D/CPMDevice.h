@@ -1,7 +1,6 @@
 #pragma once
 #include "core.h"
-#include "matrix.h"
-#include "CPMGameObject.h"
+//#include "CPMGameObject.h"
 //extern int screen_h;
 //using namespace std;
 #define RENDER_STATE_WIREFRAME      1		// äÖÈ¾Ïß¿ò
