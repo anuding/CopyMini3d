@@ -7,8 +7,7 @@ class CPMRenderer
 public:
 	CPMRenderer(CPMScene &_scene, CPMDevice &_device);
 	~CPMRenderer();
-	std::vector<Vertex> vertex_buffer;
-	std::vector<int> index_buffer;
+
 
 	CPMScene* scene;
 	CPMDevice* device;

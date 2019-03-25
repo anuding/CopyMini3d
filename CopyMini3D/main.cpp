@@ -28,7 +28,7 @@ int main() {
 		screen_update();
 		int fps = 1000.0 / timer.tick();
 		bool res = SetWindowTextA(screen_handle, (LPCSTR)fps);
-		cout << "FPS: "<<fps << endl;
+		//cout << "FPS: "<<fps << endl;
 		Sleep(1);
 	}
 	
