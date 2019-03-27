@@ -71,5 +71,8 @@
     <ClCompile Include="CPMRenderer.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="matrix.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

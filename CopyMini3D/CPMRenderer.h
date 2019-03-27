@@ -2,20 +2,21 @@
 #include "CPMScene.h"
 #include "CPMDevice.h"
 #include <Windows.h>
+enum MODES{
+	WIRE_FRAME = 0,
+	CONSTANT_COLOR=1,
+	TEXTURE=2
+};
 class CPMRenderer
 {
 public:
 	CPMRenderer(CPMScene &_scene, CPMDevice &_device);
 	~CPMRenderer();
 
+	MODES mode = WIRE_FRAME;
 
 	CPMScene* scene;
 	CPMDevice* device;
 
 	void Draw();
 };
-
-//vertex_buffer.insert(vertex_buffer.end(),
-//	obj->vertex_list.begin(), obj->vertex_list.end());
-//index_buffer.insert(index_buffer.end(),
-//	obj->index_list.begin(), obj->index_list.end());
