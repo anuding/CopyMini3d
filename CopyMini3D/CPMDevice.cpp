@@ -3,7 +3,7 @@ CPMDevice::CPMDevice(int width, int height, void* fb)
 {
 	Init(width, height, fb);
 }
-//float z_buffer[800][600] = { 0 };
+
 void CPMDevice::Init(int width, int height, void* fb)
 {
 	int need = sizeof(void*) * (height * 2 + 1024) + width * height * 8;
@@ -52,7 +52,7 @@ void CPMDevice::Clear(int mode) {
 	}
 	for (y = 0; y < height; y++) {
 		float *dst = zbuffer[y];
-		for (x = width; x > 0; dst++, x--) dst[0] = 10.0f;
+		for (x = width; x > 0; dst++, x--) dst[0] = 100.0f;
 	}
 }
 

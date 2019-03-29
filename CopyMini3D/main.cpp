@@ -1,10 +1,15 @@
 #include <iostream>
 //#include "CPMDevice.h"
+
+
 #include "CPMRenderer.h"
 #include "utils.h"
 using namespace std;
 
 int main() {
+	
+
+	
 	const TCHAR *title = _T("Mini3d (software render tutorial) - Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
 	if (screen_init(800, 600, title))
 		return -1;
@@ -17,8 +22,8 @@ int main() {
 	//tri->InitAsTriangle();
 	scene.AddGameObject(tri);
 	CPMRenderer renderer(scene,device);
-	float rox = 0.56f;
-	float roy = -0.02f;
+	float rox = -3.15f;
+	float roy = -2.99f;
 	MODES mode = CONSTANT_COLOR;
 	int indicator = 0;
 	int kbhit = 0;
@@ -63,7 +68,7 @@ int main() {
 		renderer.mode = mode;
 		tri->rotaX = rox;
 		tri->rotaY = roy;
-		//cout << rox << " " << roy << endl;
+		cout << rox << " " << roy << endl;
 		renderer.Draw();
 		
 		screen_update();

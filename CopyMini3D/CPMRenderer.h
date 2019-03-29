@@ -1,6 +1,7 @@
 #pragma once
 #include "CPMScene.h"
 #include "CPMDevice.h"
+#include "lodepng.h"
 #include <Windows.h>
 enum MODES{
 	WIRE_FRAME = 0,

@@ -23,8 +23,32 @@ using namespace std;
 
 IUINT32 **g_frame_buffer;
 float **zbuffer;
+IUINT32 texture[256][256] = { 0 };
 float maxz = INT_MIN, minz = INT_MAX, sum = 0;
 Timer timer;
+void decodeOneStep(const char* filename)
+{
+	std::vector<unsigned char> image; //the raw pixels
+	unsigned width, height;
+
+	//decode
+	unsigned error = lodepng::decode(image, width, height, filename);
+
+	//if there's an error, display it
+	if (error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+
+	//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA..., use it as texture, draw it, ...
+	int cnt = 0;
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			texture[i][j] =RGB(image[cnt], image[cnt+1], image[cnt+2]);
+			cnt += 4;
+		}
+	}
+}
+
 
 
 CPMRenderer::CPMRenderer(CPMScene& _scene, CPMDevice& _device)
@@ -33,10 +57,27 @@ CPMRenderer::CPMRenderer(CPMScene& _scene, CPMDevice& _device)
 	device = &_device;
 	g_frame_buffer = device->framebuffer;
 	zbuffer = device->zbuffer;
+	//texture = device->texture;
+	const char* filename = "test.png";
+	decodeOneStep(filename);
 }
 
 CPMRenderer::~CPMRenderer()
 {
+}
+IUINT32 GetColor(float u, float v)
+{
+	if (u < 0 || v < 0 || isnan(u) || isnan(v))
+	{
+		cout << "u: " << u << ", v: " << v << endl;
+		COLORREF cr = RGB(0, 0, 0);
+		return cr;
+	}
+
+	int x = u * 256.0f;
+	int y = v * 256.0f;
+	IUINT32 color = texture[x][y];
+	return color;
 }
 
 void SetPixel(int x, int y, COLORREF cr)
@@ -54,26 +95,23 @@ void SetPixel(Vector4 v, COLORREF cr)
 	g_frame_buffer[y][x] = cr;
 }
 
-void SetPixel(Vertex v)
+bool SetPixel(Vertex v)
 {
 	if (v.pos.x >= 800 || v.pos.x <= 0 || v.pos.y >= 600 || v.pos.y <= 0)
-		return;
+		return true;
 	int x = v.pos.x, y = v.pos.y;
-	//sum+=timer.tick();
-	//maxz = max(maxz, v.pos.z);
-	//minz = min(minz, v.pos.z);
-	//if (sum > 10000)
-	//{
-	//	cout << maxz << " " << minz << endl;
-	//	sum = 0;
-	//}
-	COLORREF cr =RGB(v.color.r*255, v.color.g*255, v.color.b*255);
+
+	//COLORREF cr =RGB(v.color.r*255, v.color.g*255, v.color.b*255);
+	COLORREF cr = GetColor(v.tc.u, v.tc.v);
+	//COLORREF cr = RGB(0, 0, 255);//RGB(v.tc.u * 255, v.tc.v * 255, 0);
+	if (isnan(v.pos.z))
+		return false;
 	if (v.pos.z < zbuffer[y][x])
 	{
 		g_frame_buffer[y][x] = cr;
 		zbuffer[y][x] = v.pos.z;
 	}
-		
+	return true;
 }
 
 void DrawLine(int x0, int y0, int x1, int y1, COLORREF color)
@@ -172,11 +210,12 @@ void DrawLine(Vertex p0, Vertex p1, COLORREF color)
 }
 void DrawXScanline(Vertex a, Vertex b)
 {
-	for (float x = a.pos.x+1; x <= b.pos.x; x++)
+	for (float x = a.pos.x; x <= b.pos.x; x++)
 	{
 		float grad = (x - a.pos.x) / (b.pos.x - a.pos.x);
+		if (isnan(grad) || grad < 0)
+			continue;
 		Vertex v = Interpolate(a, b, grad);
-
 		SetPixel(v);
 	}
 }
@@ -328,5 +367,9 @@ void CPMRenderer::Draw()
 				DrawTriV(c, b, d);
 			}
 		}
+	}
+	if (mode == TEXTURE)
+	{
+
 	}
 }
