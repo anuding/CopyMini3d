@@ -20,11 +20,14 @@ struct Vector4 {
 typedef Vector4 Point;
 typedef struct { float r, g, b; } color_t;
 typedef struct { float u, v; } texcoord_t;
-typedef struct { Point pos; texcoord_t tc; color_t color; float rhw; } Vertex;
+struct Vertex { Point pos; texcoord_t tc; color_t color; float rhw; } ;
 
+typedef struct _oper {
+	int a;
+	int b;
+} oper;
 
-
-
+Vertex Interpolate(Vertex a, Vertex b, float grad);
 float Dot(const Vector4& v1, const Vector4& v2);
 Vector4 Cross(const Vector4& v1, const Vector4& v2);
 Vector4 Normalize(const Vector4& v1);

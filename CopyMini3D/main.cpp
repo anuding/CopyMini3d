@@ -17,9 +17,9 @@ int main() {
 	//tri->InitAsTriangle();
 	scene.AddGameObject(tri);
 	CPMRenderer renderer(scene,device);
-	float rox = 0.6f;
-	float roy = 0.6f;
-	MODES mode = WIRE_FRAME;
+	float rox = 0.56f;
+	float roy = -0.02f;
+	MODES mode = CONSTANT_COLOR;
 	int indicator = 0;
 	int kbhit = 0;
 
@@ -37,7 +37,8 @@ int main() {
 		if (screen_keys['C']) tri->size += 0.01f;
 		if (screen_keys[VK_SPACE])
 		{
-			rox = roy = 0.0f;
+			rox = 0.56;
+			roy = 0.01f;
 		}
 		if (screen_keys[VK_TAB]) 
 		{

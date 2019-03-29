@@ -1,4 +1,43 @@
 #include "matrix.h"
+
+
+Vertex operator+(const Vertex& v1, const Vertex& v2)
+{
+	Vertex ans;
+	Point pos = { v1.pos.x + v2.pos.x,v1.pos.y + v2.pos.y,v1.pos.z + v2.pos.z,0 };
+	color_t color = { v1.color.r + v2.color.r,v1.color.g + v2.color.g,v1.color.b + v2.color.b };
+	texcoord_t tex = { v1.tc.u + v2.tc.u,v1.tc.v + v2.tc.v };
+	ans = { pos,tex,color,1 };
+	return ans;
+}
+
+Vertex operator-(const Vertex& v1, const Vertex& v2)
+{
+	Vertex ans;
+	Point pos = { v1.pos.x - v2.pos.x,v1.pos.y - v2.pos.y,v1.pos.z - v2.pos.z,0 };
+	color_t color = { v1.color.r - v2.color.r,v1.color.g - v2.color.g,v1.color.b - v2.color.b };
+	texcoord_t tex = { v1.tc.u - v2.tc.u,v1.tc.v - v2.tc.v };
+	ans = { pos,tex,color,1 };
+	return ans;
+}
+
+Vertex operator*(const Vertex& v1, float k)
+{
+	Vertex ans;
+	Point pos = { v1.pos.x *k,v1.pos.y *k,v1.pos.z*k,0 };
+	color_t color = { v1.color.r *k,v1.color.g *k,v1.color.b*k };
+	texcoord_t tex = { v1.tc.u *k,v1.tc.v *k };
+	ans = { pos,tex,color,1 };
+	return ans;
+}
+
+
+Vertex Interpolate(Vertex a, Vertex b, float grad)
+{
+	Vertex ans;
+	ans = (b - a)*grad + a;
+	return ans;
+}
 float Dot(const Vector4& v1, const Vector4& v2)
 {
 	float ans;

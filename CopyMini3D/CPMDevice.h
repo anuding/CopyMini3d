@@ -1,14 +1,11 @@
 #pragma once
 #include "core.h"
-//#include "CPMGameObject.h"
-//extern int screen_h;
-//using namespace std;
+
 #define RENDER_STATE_WIREFRAME      1		// ‰÷»æœﬂøÚ
 #define RENDER_STATE_TEXTURE        2		// ‰÷»æŒ∆¿Ì
 #define RENDER_STATE_COLOR          4		// ‰÷»æ—’…´
 
 typedef unsigned int IUINT32;
-
 class CPMDevice {
 public:
 	CPMDevice(int width, int height, void* fb);

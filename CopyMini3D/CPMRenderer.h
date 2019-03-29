@@ -6,7 +6,8 @@ enum MODES{
 	WIRE_FRAME = 0,
 	CONSTANT_COLOR=1,
 	TEXTURE=2
-};
+}; 
+
 class CPMRenderer
 {
 public:

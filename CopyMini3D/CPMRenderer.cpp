@@ -1,6 +1,6 @@
 #include "CPMRenderer.h"
 #include <iostream>
-
+#include "utils.h"
 #include "matrix.h"
 using namespace std;
 #define RGBA(r,g,b,a)   ((COLORREF) ((uint8_t)(a)<<24)|\
@@ -22,11 +22,17 @@ using namespace std;
 
 
 IUINT32 **g_frame_buffer;
+float **zbuffer;
+float maxz = INT_MIN, minz = INT_MAX, sum = 0;
+Timer timer;
+
+
 CPMRenderer::CPMRenderer(CPMScene& _scene, CPMDevice& _device)
 {
 	scene = &_scene;
 	device = &_device;
 	g_frame_buffer = device->framebuffer;
+	zbuffer = device->zbuffer;
 }
 
 CPMRenderer::~CPMRenderer()
@@ -38,6 +44,36 @@ void SetPixel(int x, int y, COLORREF cr)
 	if (x >= 800 || x <= 0 || y >= 600 || y <= 0)
 		return;
 	g_frame_buffer[y][x] = cr;
+}
+
+void SetPixel(Vector4 v, COLORREF cr)
+{
+	if (v.x >= 800 || v.x <= 0 || v.y >= 600 || v.y <= 0)
+		return;
+	int x = v.x, y = v.y;
+	g_frame_buffer[y][x] = cr;
+}
+
+void SetPixel(Vertex v)
+{
+	if (v.pos.x >= 800 || v.pos.x <= 0 || v.pos.y >= 600 || v.pos.y <= 0)
+		return;
+	int x = v.pos.x, y = v.pos.y;
+	//sum+=timer.tick();
+	//maxz = max(maxz, v.pos.z);
+	//minz = min(minz, v.pos.z);
+	//if (sum > 10000)
+	//{
+	//	cout << maxz << " " << minz << endl;
+	//	sum = 0;
+	//}
+	COLORREF cr =RGB(v.color.r*255, v.color.g*255, v.color.b*255);
+	if (v.pos.z < zbuffer[y][x])
+	{
+		g_frame_buffer[y][x] = cr;
+		zbuffer[y][x] = v.pos.z;
+	}
+		
 }
 
 void DrawLine(int x0, int y0, int x1, int y1, COLORREF color)
@@ -86,11 +122,10 @@ void DrawLine(int x0, int y0, int x1, int y1, COLORREF color)
 		}
 	}
 }
-
-void DrawLine(Vector4 p0, Vector4 p1, COLORREF color)
+void DrawLine(Vertex p0, Vertex p1, COLORREF color)
 {
-	int x0 = p0.x; int y0 = p0.y;
-	int x1 = p1.x; int y1 = p1.y;
+	int x0 = p0.pos.x; int y0 = p0.pos.y;
+	int x1 = p1.pos.x; int y1 = p1.pos.y;
 	int dx = ABS(x1 - x0);
 	int dy = ABS(y1 - y0);
 	int x = x0;
@@ -135,27 +170,79 @@ void DrawLine(Vector4 p0, Vector4 p1, COLORREF color)
 		}
 	}
 }
+void DrawXScanline(Vertex a, Vertex b)
+{
+	for (float x = a.pos.x+1; x <= b.pos.x; x++)
+	{
+		float grad = (x - a.pos.x) / (b.pos.x - a.pos.x);
+		Vertex v = Interpolate(a, b, grad);
 
+		SetPixel(v);
+	}
+}
 
+void DrawTriA(Vertex top, Vertex left, Vertex right)
+{
+	/*
+	top
+	|\
+	| \
+	|  \
+	|___\
+	left right
+	*/
+	if (abs(left.pos.y - top.pos.y) < 1 || abs(right.pos.y - top.pos.y) < 1)
+		return;
+	for (int y = left.pos.y; y <= top.pos.y; y++)
+	{
+		float grad = (y - left.pos.y) / (top.pos.y - left.pos.y);
+		if (grad < 0)
+			continue;
+		Vertex lv = Interpolate(left, top, grad);
+		Vertex rv = Interpolate(right, top, grad);
+
+		//if (lv.pos.x < 200)
+		//	getchar();
+		DrawXScanline(lv, rv);
+	}
+}
+void DrawTriV(Vertex bottom, Vertex left, Vertex right)
+{
+	/*
+	left  right
+	_____
+	|   /
+	|  /
+	| /
+	|/
+	bottom
+	*/
+	if (abs(left.pos.y - bottom.pos.y) < 1 || abs(right.pos.y - bottom.pos.y) < 1)
+		return;
+	for (int y = bottom.pos.y; y <= left.pos.y; y++)
+	{
+		float grad = (y - bottom.pos.y) / (left.pos.y - bottom.pos.y);
+		if (grad < 0)
+			continue;
+		Vertex lv = Interpolate(bottom, left, grad);
+		Vertex rv = Interpolate(bottom, right, grad);
+
+		DrawXScanline(lv, rv);
+	}
+}
 
 void CPMRenderer::Draw()
 {
-
 	//DrawLine(10, 100, 300, 40, RED);
 	auto obj = scene->obj_list[0];
-	std::vector<Vector4> points_buffer;
+	std::vector<Vertex> points_buffer;
 	std::vector<int> index_buffer;
 
-	for (int i = 0; i < obj->vertex_list.size(); i++)
-	{
-		Vector4 tmp = obj->vertex_list[i].pos;
-		points_buffer.push_back(tmp);
-	}
-	index_buffer.insert(index_buffer.end(),
-		obj->index_list.begin(), obj->index_list.end());
+	points_buffer = obj->vertex_list;
+	index_buffer = obj->index_list;
 
 
-	//Vector4 
+	//World -> View -> Projection 
 	for (int i = 0; i < points_buffer.size(); i++)
 	{
 		matrix wvp;
@@ -172,22 +259,22 @@ void CPMRenderer::Draw()
 		matrix rotaX = RotaXMat(obj->rotaX);
 		matrix rotaY = RotaYMat(obj->rotaY);
 
-		points_buffer[i] = Mul(points_buffer[i], scal);
-		points_buffer[i] = Mul(points_buffer[i], rotaX);
-		points_buffer[i] = Mul(points_buffer[i], rotaY);
-		points_buffer[i] = Mul(points_buffer[i], view);
-		points_buffer[i] = Mul(points_buffer[i], proj);
+		points_buffer[i].pos = Mul(points_buffer[i].pos, scal);
+		points_buffer[i].pos = Mul(points_buffer[i].pos, rotaX);
+		points_buffer[i].pos = Mul(points_buffer[i].pos, rotaY);
+		points_buffer[i].pos = Mul(points_buffer[i].pos, view);
+		points_buffer[i].pos = Mul(points_buffer[i].pos, proj);
 
 
 		//perspective divsion
-		points_buffer[i].x = points_buffer[i].x / points_buffer[i].w;
-		points_buffer[i].y = points_buffer[i].y / points_buffer[i].w;
-		points_buffer[i].z = points_buffer[i].z / points_buffer[i].w;
-		points_buffer[i].w = points_buffer[i].w / points_buffer[i].w;
+		points_buffer[i].pos.x = points_buffer[i].pos.x / points_buffer[i].pos.w;
+		points_buffer[i].pos.y = points_buffer[i].pos.y / points_buffer[i].pos.w;
+		points_buffer[i].pos.z = points_buffer[i].pos.z / points_buffer[i].pos.w;
+		points_buffer[i].pos.w = points_buffer[i].pos.w / points_buffer[i].pos.w;
 
 		//screen mapping
-		points_buffer[i].x = points_buffer[i].x * 100.0f + 800 / 2;
-		points_buffer[i].y = -points_buffer[i].y * 100.0f + 600 / 2;
+		points_buffer[i].pos.x = points_buffer[i].pos.x * 100.0f + 800 / 2;
+		points_buffer[i].pos.y = -points_buffer[i].pos.y * 100.0f + 600 / 2;
 	}
 	if (mode == WIRE_FRAME)
 	{
@@ -202,31 +289,21 @@ void CPMRenderer::Draw()
 	{
 		for (int i = 0; i < index_buffer.size(); i += 3)
 		{
-			Vector4 a = points_buffer[index_buffer[i]];
-			Vector4 b = points_buffer[index_buffer[i + 1]];
-			Vector4 c = points_buffer[index_buffer[i + 2]];
-			Vector4 tmp;
-			if (a.y < b.y)
-			{
-				tmp = a;
-				a = b;
-				b = tmp;
-			}
-			if (a.y < c.y)
-			{
-				tmp = a;
-				a = c;
-				c = tmp;
-			}
-			if (b.y < c.y)
-			{
-				tmp = b;
-				b = c;
-				c = tmp;
-			}
-			Vector4 d;
-			d.y = b.y;
-			if (b.x > a.x)
+			Vertex a = points_buffer[index_buffer[i]];
+			Vertex b = points_buffer[index_buffer[i + 1]];
+			Vertex c = points_buffer[index_buffer[i + 2]];
+			
+			if (a.pos.y < b.pos.y)
+				swap(a, b);
+			if (a.pos.y < c.pos.y)
+				swap(a, c);
+			if (b.pos.y < c.pos.y)
+				swap(b, c);
+			Vertex d;
+			float grad = (b.pos.y-c.pos.y) / (a.pos.y-c.pos.y);
+
+			d = Interpolate(c, a, grad);
+			if (b.pos.x > d.pos.x)
 			{
 				/*
 				a
@@ -235,26 +312,8 @@ void CPMRenderer::Draw()
 				| /
 				c
 				*/
-				d.x = (d.y - c.y)*(a.x - c.x) / (a.y - c.y) + c.x;
-				d.z = (d.y - c.y)*(a.z - c.z) / (a.y - c.y) + c.z;
-				d.w = 1;
-				float k1 = (a.y - d.y) / (a.x - d.x);
-				float b1 = a.y - k1 * a.x;
-				float k2 = (a.y - b.y) / (a.x - b.x);
-				float b2 = a.y - k2 * a.x;
-				for (int y = d.y; y <= a.y; y++)
-				{
-					int x1 = (y - b1) / k1;
-					int x2 = (y - b2) / k2;
-					if (x1 < 0 || x2 < 0)
-					{
-						cout << x1 << " " << x2 << endl;
-						break;
-						getchar();
-						int l = 0;
-					}
-					DrawLine(x1, y, x2, y, RED);
-				}
+				DrawTriA(a, d, b);
+				DrawTriV(c, d, b);
 			}
 			else
 			{
@@ -265,8 +324,9 @@ void CPMRenderer::Draw()
 				  \	|
 					c
 				*/
+				DrawTriA(a, b, d);
+				DrawTriV(c, b, d);
 			}
-			//getchar();
 		}
 	}
 }
