@@ -18,12 +18,13 @@ int main() {
 	CPMDevice device(800, 600, screen_fb);
 	CPMScene scene;
 	CPMGameObject* tri=new CPMGameObject();
-	tri->InitAsCube();
+	//tri->InitAsCube();
+	tri->InitFromObj("Cube.obj");//Sphere Cube
 	//tri->InitAsTriangle();
 	scene.AddGameObject(tri);
 	CPMRenderer renderer(scene,device);
-	float rox = -3.15f;
-	float roy = -2.99f;
+	float rox = 0;
+	float roy = 0;
 	MODES mode = CONSTANT_COLOR;
 	int indicator = 0;
 	int kbhit = 0;
@@ -33,17 +34,21 @@ int main() {
 		screen_dispatch();
 		device.Clear(0);
 
-		if (screen_keys['W']) rox -= 0.01f;
-		if (screen_keys['S']) rox += 0.01f;
-		if (screen_keys['A']) roy += 0.01f;
-		if (screen_keys['D']) roy -= 0.01f;
+		if (screen_keys['W']) rox -= 0.6f;
+		if (screen_keys['S']) rox += 0.6f;
+		if (screen_keys['A']) roy += 0.1f;
+		if (screen_keys['D']) roy -= 0.1f;
 
 		if (screen_keys['X']) tri->size -= 0.01f;
 		if (screen_keys['C']) tri->size += 0.01f;
+
+		if (screen_keys['J']) theta -= 0.1f;
+		if (screen_keys['K']) theta += 0.1f;
 		if (screen_keys[VK_SPACE])
 		{
-			rox = 0.56;
-			roy = 0.01f;
+			rox = 0;
+			roy = 0;
+			tri->size=3.0f / 100.0f;
 		}
 		if (screen_keys[VK_TAB]) 
 		{

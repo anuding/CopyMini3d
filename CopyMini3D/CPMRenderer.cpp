@@ -80,6 +80,17 @@ IUINT32 GetColor(float u, float v)
 	return color;
 }
 
+Vector3 Uint32ToVector(IUINT32 color)
+{
+	BYTE r = color;
+	BYTE g = color>>8;
+	BYTE b = color >> 16;
+	BYTE a = color >> 24;
+
+	Vector3 ans(r/255.0f,g / 255.0f,b / 255.0f);
+	return ans;
+}
+
 void SetPixel(int x, int y, COLORREF cr)
 {
 	if (x >= 800 || x <= 0 || y >= 600 || y <= 0)
@@ -95,20 +106,37 @@ void SetPixel(Vector4 v, COLORREF cr)
 	g_frame_buffer[y][x] = cr;
 }
 
+
+float theta = 0.0f;
+
 bool SetPixel(Vertex v)
 {
 	if (v.pos.x >= 800 || v.pos.x <= 0 || v.pos.y >= 600 || v.pos.y <= 0)
 		return true;
 	int x = v.pos.x, y = v.pos.y;
 
-	//COLORREF cr =RGB(v.color.r*255, v.color.g*255, v.color.b*255);
-	COLORREF cr = GetColor(v.tc.u, v.tc.v);
-	//COLORREF cr = RGB(0, 0, 255);//RGB(v.tc.u * 255, v.tc.v * 255, 0);
 	if (isnan(v.pos.z))
 		return false;
 	if (v.pos.z < zbuffer[y][x])
 	{
-		g_frame_buffer[y][x] = cr;
+		//max(L*n,0)*B@m
+		/*COLORREF cr = RGB(v.tc.x * 255, v.tc.y * 255, v.tc.z * 255);
+		cr = RGB(v.normal.x * 255, v.normal.y * 255, v.normal.z * 255);*/
+		Vector3 tex_color = Uint32ToVector(GetColor(v.tc.x, v.tc.y));
+		
+		//theta += 0.01f;
+		//static float phi = 0.0f;
+		Vector3 ld(cos(theta),1 , sin(theta));//light dir
+		ld = Normalize(ld);
+		Vector3 l(0.8, 0.8, 0.8);//light color
+		Vector3 m(0.1, 1.0, 0.25);//material
+		Vector3 n = Normalize(v.normal);
+
+		Vector3 diffuse = Modulate(l, tex_color) * max(Dot(ld, n), 0);
+
+		g_frame_buffer[y][x] = RGB(diffuse.z*255, 
+			diffuse.y * 255, 
+			diffuse.x * 255);
 		zbuffer[y][x] = v.pos.z;
 	}
 	return true;
@@ -116,6 +144,54 @@ bool SetPixel(Vertex v)
 
 void DrawLine(int x0, int y0, int x1, int y1, COLORREF color)
 {
+	int dx = ABS(x1 - x0);
+	int dy = ABS(y1 - y0);
+	int x = x0;
+	int y = y0;
+	int stepX = 1;
+	int stepY = 1;
+	if (x0 > x1)  //从右向左画
+		stepX = -1;
+	if (y0 > y1)
+		stepY = -1;
+
+	if (dx > dy)  //沿着最长的那个轴前进
+	{
+		int e = -dx;
+		int i;
+		for (i = 0; i <= dx; i++)
+		{
+			SetPixel(x, y, color);
+			x += stepX;
+			e += 2 * dy;
+			if (e >= 0)
+			{
+				y += stepY;
+				e -= 2 * dx;
+			}
+		}
+	}
+	else
+	{
+		int e = 2 * dx - dy;
+		int i;
+		for (i = 0; i <= dy; i++)
+		{
+			SetPixel(x, y, color);
+			y += stepY;
+			e += dx;
+			if (e >= 0)
+			{
+				x += stepX;
+				e -= dy;
+			}
+		}
+	}
+}
+void DrawLine(Vector4 p0, Vector4 p1, COLORREF color)
+{
+	int x0 = p0.x; int y0 = p0.y;
+	int x1 = p1.x; int y1 = p1.y;
 	int dx = ABS(x1 - x0);
 	int dy = ABS(y1 - y0);
 	int x = x0;
@@ -240,8 +316,6 @@ void DrawTriA(Vertex top, Vertex left, Vertex right)
 		Vertex lv = Interpolate(left, top, grad);
 		Vertex rv = Interpolate(right, top, grad);
 
-		//if (lv.pos.x < 200)
-		//	getchar();
 		DrawXScanline(lv, rv);
 	}
 }
@@ -274,64 +348,88 @@ void CPMRenderer::Draw()
 {
 	//DrawLine(10, 100, 300, 40, RED);
 	auto obj = scene->obj_list[0];
-	std::vector<Vertex> points_buffer;
-	std::vector<int> index_buffer;
+	
+	auto pos_list = obj->pos_list;
+	std::vector<Vector4> pos_buffer;
+	pos_buffer.resize(pos_list.size());
 
-	points_buffer = obj->vertex_list;
-	index_buffer = obj->index_list;
+	std::vector<Vector4> normal_buffer;
+	normal_buffer.resize(obj->normal_list.size());
+
+	auto index_list=obj->index_list;
 
 
 	//World -> View -> Projection 
-	for (int i = 0; i < points_buffer.size(); i++)
+	for (int i = 0; i < pos_list.size(); i++)
 	{
 		matrix wvp;
 		Vector4 viewpoint, target, up;
-		viewpoint.SetVector(0, 0, 20, 1);
+		viewpoint.SetVector(20*cos(obj->rotaY), obj->rotaX, 20*sin(obj->rotaY), 1);
 		target.SetVector(0, 0, 0, 1);
 		up.SetVector(0, 1, 0, 0);
 		matrix view = LooAtMat(viewpoint, target, up);
-		matrix proj = ProjMat(3.1415926f * 0.1f, 800.0f / 600.0f, 1.0f, 500.0f);
+		matrix proj = ProjMat(3.1415926f * 0.1f, 800.0f / 800.0f, 1.0f, 500.0f);
 		float size = obj->size;
 		matrix scal = ScalMat(size, size, size);
 
 
-		matrix rotaX = RotaXMat(obj->rotaX);
-		matrix rotaY = RotaYMat(obj->rotaY);
+		matrix rotaX = RotaXMat(0);
+		matrix rotaY = RotaYMat(0);
 
-		points_buffer[i].pos = Mul(points_buffer[i].pos, scal);
-		points_buffer[i].pos = Mul(points_buffer[i].pos, rotaX);
-		points_buffer[i].pos = Mul(points_buffer[i].pos, rotaY);
-		points_buffer[i].pos = Mul(points_buffer[i].pos, view);
-		points_buffer[i].pos = Mul(points_buffer[i].pos, proj);
+		Vector4 tmp(pos_list[i], 1);
+		pos_buffer[i] = Mul(tmp, scal);
+		pos_buffer[i] = Mul(pos_buffer[i], rotaX);
+		pos_buffer[i] = Mul(pos_buffer[i], rotaY);
+		pos_buffer[i] = Mul(pos_buffer[i], view);
+		pos_buffer[i] = Mul(pos_buffer[i], proj);
 
 
 		//perspective divsion
-		points_buffer[i].pos.x = points_buffer[i].pos.x / points_buffer[i].pos.w;
-		points_buffer[i].pos.y = points_buffer[i].pos.y / points_buffer[i].pos.w;
-		points_buffer[i].pos.z = points_buffer[i].pos.z / points_buffer[i].pos.w;
-		points_buffer[i].pos.w = points_buffer[i].pos.w / points_buffer[i].pos.w;
+		pos_buffer[i].x = pos_buffer[i].x / pos_buffer[i].w;
+		pos_buffer[i].y = pos_buffer[i].y / pos_buffer[i].w;
+		pos_buffer[i].z = pos_buffer[i].z / pos_buffer[i].w;
+		pos_buffer[i].w = pos_buffer[i].w / pos_buffer[i].w;
 
 		//screen mapping
-		points_buffer[i].pos.x = points_buffer[i].pos.x * 100.0f + 800 / 2;
-		points_buffer[i].pos.y = -points_buffer[i].pos.y * 100.0f + 600 / 2;
+		pos_buffer[i].x = pos_buffer[i].x * 100.0f + 800 / 2;
+		pos_buffer[i].y = -pos_buffer[i].y * 100.0f + 600 / 2;
+
 	}
+
 	if (mode == WIRE_FRAME)
 	{
-		for (int i = 0; i < index_buffer.size(); i += 3)
+		for (int i = 0; i < index_list.size(); i += 3)
 		{
-			DrawLine(points_buffer[index_buffer[i]], points_buffer[index_buffer[i + 1]], RED);
-			DrawLine(points_buffer[index_buffer[i + 1]], points_buffer[index_buffer[i + 2]], RED);
-			DrawLine(points_buffer[index_buffer[i]], points_buffer[index_buffer[i + 2]], RED);
+			DrawLine(pos_buffer[index_list[i].pos], pos_buffer[index_list[i + 1].pos], RED);
+			DrawLine(pos_buffer[index_list[i + 1].pos], pos_buffer[index_list[i + 2].pos], RED);
+			DrawLine(pos_buffer[index_list[i].pos], pos_buffer[index_list[i + 2].pos], RED);
 		}
 	}
 	if (mode == CONSTANT_COLOR)
 	{
-		for (int i = 0; i < index_buffer.size(); i += 3)
+		for (int i = 0; i < index_list.size(); i += 3)
 		{
-			Vertex a = points_buffer[index_buffer[i]];
-			Vertex b = points_buffer[index_buffer[i + 1]];
-			Vertex c = points_buffer[index_buffer[i + 2]];
-			
+			Vertex a, b, c;
+			a.pos = pos_buffer[index_list[i].pos];
+			b.pos = pos_buffer[index_list[i + 1].pos];
+			c.pos = pos_buffer[index_list[i + 2].pos];
+
+			a.tc = obj->tex_list[index_list[i].tex];
+			b.tc = obj->tex_list[index_list[i+1].tex];
+			c.tc = obj->tex_list[index_list[i+2].tex];
+
+			a.normal = obj->normal_list[index_list[i].normal];
+			b.normal = obj->normal_list[index_list[i + 1].normal];
+			c.normal = obj->normal_list[index_list[i + 2].normal];
+
+			//判断绕序
+			Vector4 e0 = a.pos - b.pos;
+			Vector4 e1 = c.pos - b.pos;
+			Vector4 n = Normalize(Cross(e0, e1));
+			Vector4 eyesight = { 0,0,1,0 };
+			if (Dot(eyesight, n) > 0)//同向,需要剔除
+				continue;
+
 			if (a.pos.y < b.pos.y)
 				swap(a, b);
 			if (a.pos.y < c.pos.y)

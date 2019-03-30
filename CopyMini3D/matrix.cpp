@@ -1,33 +1,53 @@
 #include "matrix.h"
 
+Vector4 Vector4::operator-(const Vector4& v1)const
+{
+	Vector4 ans;
+	ans.SetVector(x - v1.x, y - v1.y, z - v1.z, 0);
+	return ans;
+}
 
+Vector3 Modulate(const Vector3& v1, const Vector3& v2)
+{
+	Vector3 ans(v1.x*v2.x, v1.y*v2.y, v1.z*v2.z);
+	return ans;
+}
+Vector3 Vector3::operator*(float k)
+{
+	Vector3 ans;
+	ans.SetVector(x*k, y*k, z*k);
+	return ans;
+}
 Vertex operator+(const Vertex& v1, const Vertex& v2)
 {
 	Vertex ans;
-	Point pos = { v1.pos.x + v2.pos.x,v1.pos.y + v2.pos.y,v1.pos.z + v2.pos.z,0 };
-	color_t color = { v1.color.r + v2.color.r,v1.color.g + v2.color.g,v1.color.b + v2.color.b };
-	texcoord_t tex = { v1.tc.u + v2.tc.u,v1.tc.v + v2.tc.v };
-	ans = { pos,tex,color,1 };
+	Position pos = { v1.pos.x + v2.pos.x,v1.pos.y + v2.pos.y,v1.pos.z + v2.pos.z,0 };
+	color_t color = { v1.color.x + v2.color.x,v1.color.y + v2.color.y,v1.color.z + v2.color.z };
+	texcoord_t tex = { v1.tc.x + v2.tc.x,v1.tc.y + v2.tc.y,v1.tc.z + v2.tc.z };
+	normal_t normal = { v1.normal.x + v2.normal.x,v1.normal.y + v2.normal.y,v1.normal.z + v2.normal.z };
+	ans = { pos,tex,color,normal,1 };
 	return ans;
 }
 
 Vertex operator-(const Vertex& v1, const Vertex& v2)
 {
 	Vertex ans;
-	Point pos = { v1.pos.x - v2.pos.x,v1.pos.y - v2.pos.y,v1.pos.z - v2.pos.z,0 };
-	color_t color = { v1.color.r - v2.color.r,v1.color.g - v2.color.g,v1.color.b - v2.color.b };
-	texcoord_t tex = { v1.tc.u - v2.tc.u,v1.tc.v - v2.tc.v };
-	ans = { pos,tex,color,1 };
+	Position pos = { v1.pos.x - v2.pos.x,v1.pos.y - v2.pos.y,v1.pos.z - v2.pos.z,0 };
+	color_t color = { v1.color.x - v2.color.x,v1.color.y - v2.color.y,v1.color.z - v2.color.z };
+	texcoord_t tex = { v1.tc.x - v2.tc.x,v1.tc.y - v2.tc.y,v1.tc.z - v2.tc.z };
+	normal_t normal = { v1.normal.x - v2.normal.x,v1.normal.y - v2.normal.y,v1.normal.z - v2.normal.z };
+	ans = { pos,tex,color,normal,1 };
 	return ans;
 }
 
 Vertex operator*(const Vertex& v1, float k)
 {
 	Vertex ans;
-	Point pos = { v1.pos.x *k,v1.pos.y *k,v1.pos.z*k,0 };
-	color_t color = { v1.color.r *k,v1.color.g *k,v1.color.b*k };
-	texcoord_t tex = { v1.tc.u *k,v1.tc.v *k };
-	ans = { pos,tex,color,1 };
+	Position pos = { v1.pos.x *k,v1.pos.y *k,v1.pos.z*k,0 };
+	color_t color = { v1.color.x * k, v1.color.y * k, v1.color.z * k };
+	texcoord_t tex = { v1.tc.x * k, v1.tc.y * k, v1.tc.z *k };
+	normal_t normal = { v1.normal.x * k, v1.normal.y * k, v1.normal.z * k };
+	ans = { pos,tex,color,normal,1 };
 	return ans;
 }
 
@@ -38,6 +58,8 @@ Vertex Interpolate(Vertex a, Vertex b, float grad)
 	ans = (b - a)*grad + a;
 	return ans;
 }
+
+//v4 dot
 float Dot(const Vector4& v1, const Vector4& v2)
 {
 	float ans;
@@ -48,6 +70,16 @@ float Dot(const Vector4& v1, const Vector4& v2)
 	return ans;
 }
 
+//v3 dot
+float Dot(const Vector3& v1, const Vector3& v2)
+{
+	float ans;
+	float a1, b1, c1, a2, b2, c2;
+	a1 = v1.x; b1 = v1.y; c1 = v1.z;
+	a2 = v2.x; b2 = v2.y; c2 = v2.z;
+	ans = a1 * a2 + b1 * b2 + c1 * c2;
+	return ans;
+}
 Vector4 Cross(const Vector4& v1, const Vector4& v2)
 {
 	Vector4 ans;
@@ -55,6 +87,13 @@ Vector4 Cross(const Vector4& v1, const Vector4& v2)
 	a1 = v1.x; b1 = v1.y; c1 = v1.z;
 	a2 = v2.x; b2 = v2.y; c2 = v2.z;
 	ans.SetVector(b1*c2 - b2 * c1, c1*a2 - a1 * c2, a1*b2 - a2 * b1, 0);
+	return ans;
+}
+Vector3 Normalize(const Vector3& v1)
+{
+	Vector3 ans;
+	float k = sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+	ans.SetVector(v1.x / k, v1.y / k, v1.z / k);
 	return ans;
 }
 Vector4 Normalize(const Vector4& v1)
@@ -67,7 +106,7 @@ Vector4 Normalize(const Vector4& v1)
 
 Vector4 Mul(const Vector4& v, const matrix& m)
 {
-	Vector4 ans = { 0 };
+	Vector4 ans;// = { 0 };
 	ans.x = v.x*m.m[0][0] + v.y*m.m[1][0] + v.z*m.m[2][0] + v.w*m.m[3][0];
 	ans.y = v.x*m.m[0][1] + v.y*m.m[1][1] + v.z*m.m[2][1] + v.w*m.m[3][1];
 	ans.z = v.x*m.m[0][2] + v.y*m.m[1][2] + v.z*m.m[2][2] + v.w*m.m[3][2];
@@ -133,25 +172,25 @@ matrix ScalMat(float x, float y, float z) {
 	return m;
 }
 
-matrix LooAtMat(Vector4 viewpoint, Vector4 target, Vector4 up) {
+matrix LooAtMat(Vector4 viewVector4, Vector4 target, Vector4 up) {
 	matrix m = IdentityMat();
-	Vector4 z = Normalize(target - viewpoint);
+	Vector4 z = Normalize(target - viewVector4);
 	Vector4 x = Normalize(Cross(up, z));
 	Vector4 y = Normalize(Cross(z, x));
 	m.m[0][0] = x.x;
 	m.m[1][0] = x.y;
 	m.m[2][0] = x.z;
-	m.m[3][0] = -Dot(viewpoint, x);
+	m.m[3][0] = -Dot(viewVector4, x);
 
 	m.m[0][1] = y.x;
 	m.m[1][1] = y.y;
 	m.m[2][1] = y.z;
-	m.m[3][1] = -Dot(viewpoint, y);
+	m.m[3][1] = -Dot(viewVector4, y);
 
 	m.m[0][2] = z.x;
 	m.m[1][2] = z.y;
 	m.m[2][2] = z.z;
-	m.m[3][2] = -Dot(viewpoint, z);
+	m.m[3][2] = -Dot(viewVector4, z);
 
 	return m;
 }

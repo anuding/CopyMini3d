@@ -8,10 +8,11 @@ enum MODES{
 	CONSTANT_COLOR=1,
 	TEXTURE=2
 }; 
-
+extern float theta;
 class CPMRenderer
 {
 public:
+	
 	CPMRenderer(CPMScene &_scene, CPMDevice &_device);
 	~CPMRenderer();
 
