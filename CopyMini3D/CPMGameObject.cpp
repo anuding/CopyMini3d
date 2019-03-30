@@ -126,7 +126,9 @@ bool CPMGameObject::InitFromObj(std::string filename)
 			index_list.push_back(tmp);
 		}
 	}
-
+	Vector3 t;
+	if (tex_list.size() == 0)
+		tex_list.push_back(t);
 	
 	//getchar();
 	cout << "Loading completed." << endl;

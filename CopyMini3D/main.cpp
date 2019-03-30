@@ -10,7 +10,7 @@ int main() {
 	
 
 	
-	const TCHAR *title = _T("Mini3d (software render tutorial) - Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
+	const TCHAR *title = _T("CPM");
 	if (screen_init(800, 600, title))
 		return -1;
 	
@@ -19,7 +19,7 @@ int main() {
 	CPMScene scene;
 	CPMGameObject* tri=new CPMGameObject();
 	//tri->InitAsCube();
-	tri->InitFromObj("Cube.obj");//Sphere Cube
+	tri->InitFromObj("Cube.obj");//Sphere Cube bunny_c4d_less
 	//tri->InitAsTriangle();
 	scene.AddGameObject(tri);
 	CPMRenderer renderer(scene,device);

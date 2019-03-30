@@ -119,17 +119,13 @@ bool SetPixel(Vertex v)
 		return false;
 	if (v.pos.z < zbuffer[y][x])
 	{
-		//max(L*n,0)*B@m
-		/*COLORREF cr = RGB(v.tc.x * 255, v.tc.y * 255, v.tc.z * 255);
-		cr = RGB(v.normal.x * 255, v.normal.y * 255, v.normal.z * 255);*/
+		
 		Vector3 tex_color = Uint32ToVector(GetColor(v.tc.x, v.tc.y));
 		
-		//theta += 0.01f;
-		//static float phi = 0.0f;
 		Vector3 ld(cos(theta),1 , sin(theta));//light dir
 		ld = Normalize(ld);
 		Vector3 l(0.8, 0.8, 0.8);//light color
-		Vector3 m(0.1, 1.0, 0.25);//material
+		Vector3 m(1.0, 1.0, 1.0);//material
 		Vector3 n = Normalize(v.normal);
 
 		Vector3 diffuse = Modulate(l, tex_color) * max(Dot(ld, n), 0);
@@ -306,8 +302,8 @@ void DrawTriA(Vertex top, Vertex left, Vertex right)
 	|___\
 	left right
 	*/
-	if (abs(left.pos.y - top.pos.y) < 1 || abs(right.pos.y - top.pos.y) < 1)
-		return;
+	//if (abs(left.pos.y - top.pos.y) < 1 || abs(right.pos.y - top.pos.y) < 1)
+	//	return;
 	for (int y = left.pos.y; y <= top.pos.y; y++)
 	{
 		float grad = (y - left.pos.y) / (top.pos.y - left.pos.y);
@@ -330,8 +326,8 @@ void DrawTriV(Vertex bottom, Vertex left, Vertex right)
 	|/
 	bottom
 	*/
-	if (abs(left.pos.y - bottom.pos.y) < 1 || abs(right.pos.y - bottom.pos.y) < 1)
-		return;
+	//if (abs(left.pos.y - bottom.pos.y) < 1 || abs(right.pos.y - bottom.pos.y) < 1)
+	//	return;
 	for (int y = bottom.pos.y; y <= left.pos.y; y++)
 	{
 		float grad = (y - bottom.pos.y) / (left.pos.y - bottom.pos.y);
