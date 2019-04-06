@@ -33,7 +33,7 @@ void CPMDevice::Init(int width, int height, void* fb)
 	max_v = 1.0f;
 	this->width = width;
 	this->height = height;
-	background = 0xc0c0c0;
+	background = 0;
 	foreground = 0;
 	//transform_init(&transform, width, height);
 	render_state = RENDER_STATE_WIREFRAME;

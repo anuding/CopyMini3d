@@ -2,14 +2,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "matrix.h"
-
-struct Index
-{
-	unsigned int pos;
-	unsigned int tex;
-	unsigned int normal;
-};
+#include "Geometry.h"
 
 class CPMGameObject {
 public:

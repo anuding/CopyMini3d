@@ -1,8 +1,11 @@
 #pragma once
 #include "CPMScene.h"
 #include "CPMDevice.h"
-#include "lodepng.h"
+#include "utils.h"
+#include "matrix.h"
 #include <Windows.h>
+#include "VertexShader.h"
+#include "PixelShader.h"
 enum MODES{
 	WIRE_FRAME = 0,
 	CONSTANT_COLOR=1,
@@ -20,6 +23,7 @@ public:
 
 	CPMScene* scene;
 	CPMDevice* device;
-
+	VertexShader VS;
+	PixelShader* PS;
 	void Draw();
 };

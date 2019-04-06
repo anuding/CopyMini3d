@@ -19,7 +19,7 @@ int main() {
 	CPMScene scene;
 	CPMGameObject* tri=new CPMGameObject();
 	//tri->InitAsCube();
-	tri->InitFromObj("Cube.obj");//Sphere Cube bunny_c4d_less
+	tri->InitFromObj("Sphere1.obj");//Sphere1 Cube bunny_c4d_less
 	//tri->InitAsTriangle();
 	scene.AddGameObject(tri);
 	CPMRenderer renderer(scene,device);
@@ -48,7 +48,7 @@ int main() {
 		{
 			rox = 0;
 			roy = 0;
-			tri->size=3.0f / 100.0f;
+			tri->size=3000.0f / 100.0f;
 		}
 		if (screen_keys[VK_TAB]) 
 		{
@@ -73,13 +73,13 @@ int main() {
 		renderer.mode = mode;
 		tri->rotaX = rox;
 		tri->rotaY = roy;
-		cout << rox << " " << roy << endl;
+		//cout << rox << " " << roy << endl;
 		renderer.Draw();
 		
 		screen_update();
 		int fps = 1000.0 / timer.tick();
 		bool res = SetWindowTextA(screen_handle, (LPCSTR)fps);
-		//cout << "FPS: "<<fps << endl;
+		cout << "FPS: "<<fps << endl;
 		Sleep(1);
 	}
 	

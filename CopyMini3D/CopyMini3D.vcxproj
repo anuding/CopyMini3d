@@ -122,10 +122,15 @@
     <ClInclude Include="CPMLight.h" />
     <ClInclude Include="CPMRenderer.h" />
     <ClInclude Include="CPMScene.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="CPMDevice.h" />
+    <ClInclude Include="PBR.h" />
+    <ClInclude Include="PixelShader.h" />
     <ClInclude Include="render.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="VertexShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp" />
@@ -135,8 +140,13 @@
     <ClCompile Include="CPMLight.cpp" />
     <ClCompile Include="CPMRenderer.cpp" />
     <ClCompile Include="CPMScene.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="PBR.cpp" />
+    <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

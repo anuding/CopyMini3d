@@ -1,8 +1,5 @@
 #include "CPMRenderer.h"
 #include <iostream>
-#include "utils.h"
-#include "matrix.h"
-using namespace std;
 #define RGBA(r,g,b,a)   ((COLORREF) ((uint8_t)(a)<<24)|\
 									((uint8_t)(r)<<16|\
 									((uint8_t)(g)<<8)|\
@@ -19,35 +16,14 @@ using namespace std;
 #define WHITE RGBA(255,255,255,0)
 #define BLACK RGBA(0,0,0,0)
 #define CR_BK RGBA(255,250,250,0)
+using namespace std;
 
 
 IUINT32 **g_frame_buffer;
 float **zbuffer;
-IUINT32 texture[256][256] = { 0 };
-float maxz = INT_MIN, minz = INT_MAX, sum = 0;
+
+
 Timer timer;
-void decodeOneStep(const char* filename)
-{
-	std::vector<unsigned char> image; //the raw pixels
-	unsigned width, height;
-
-	//decode
-	unsigned error = lodepng::decode(image, width, height, filename);
-
-	//if there's an error, display it
-	if (error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
-
-	//the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA..., use it as texture, draw it, ...
-	int cnt = 0;
-	for (int i = 0; i < width; i++)
-	{
-		for (int j = 0; j < height; j++)
-		{
-			texture[i][j] =RGB(image[cnt], image[cnt+1], image[cnt+2]);
-			cnt += 4;
-		}
-	}
-}
 
 
 
@@ -57,38 +33,20 @@ CPMRenderer::CPMRenderer(CPMScene& _scene, CPMDevice& _device)
 	device = &_device;
 	g_frame_buffer = device->framebuffer;
 	zbuffer = device->zbuffer;
-	//texture = device->texture;
-	const char* filename = "test.png";
-	decodeOneStep(filename);
+
+	
+	matrix proj = ProjMat(3.1415926f * 0.1f, 800.0f / 800.0f, 1.0f, 500.0f);
+	VS.proj = proj;
+
+	PS = new PixelShader(g_frame_buffer, zbuffer);
+
+	vector<const char*> texture_names(4);
+	texture_names[0] = "test.png";
+	PS->LoadTextures(texture_names);
 }
 
 CPMRenderer::~CPMRenderer()
 {
-}
-IUINT32 GetColor(float u, float v)
-{
-	if (u < 0 || v < 0 || isnan(u) || isnan(v))
-	{
-		cout << "u: " << u << ", v: " << v << endl;
-		COLORREF cr = RGB(0, 0, 0);
-		return cr;
-	}
-
-	int x = u * 256.0f;
-	int y = v * 256.0f;
-	IUINT32 color = texture[x][y];
-	return color;
-}
-
-Vector3 Uint32ToVector(IUINT32 color)
-{
-	BYTE r = color;
-	BYTE g = color>>8;
-	BYTE b = color >> 16;
-	BYTE a = color >> 24;
-
-	Vector3 ans(r/255.0f,g / 255.0f,b / 255.0f);
-	return ans;
 }
 
 void SetPixel(int x, int y, COLORREF cr)
@@ -109,34 +67,34 @@ void SetPixel(Vector4 v, COLORREF cr)
 
 float theta = 0.0f;
 
-bool SetPixel(Vertex v)
-{
-	if (v.pos.x >= 800 || v.pos.x <= 0 || v.pos.y >= 600 || v.pos.y <= 0)
-		return true;
-	int x = v.pos.x, y = v.pos.y;
-
-	if (isnan(v.pos.z))
-		return false;
-	if (v.pos.z < zbuffer[y][x])
-	{
-		
-		Vector3 tex_color = Uint32ToVector(GetColor(v.tc.x, v.tc.y));
-		
-		Vector3 ld(cos(theta),1 , sin(theta));//light dir
-		ld = Normalize(ld);
-		Vector3 l(0.8, 0.8, 0.8);//light color
-		Vector3 m(1.0, 1.0, 1.0);//material
-		Vector3 n = Normalize(v.normal);
-
-		Vector3 diffuse = Modulate(l, tex_color) * max(Dot(ld, n), 0);
-
-		g_frame_buffer[y][x] = RGB(diffuse.z*255, 
-			diffuse.y * 255, 
-			diffuse.x * 255);
-		zbuffer[y][x] = v.pos.z;
-	}
-	return true;
-}
+//bool SetPixel(Vertex v)
+//{
+//	if (v.pos.x >= 800 || v.pos.x <= 0 || v.pos.y >= 600 || v.pos.y <= 0)
+//		return true;
+//	int x = v.pos.x, y = v.pos.y;
+//
+//	if (isnan(v.pos.z))
+//		return false;
+//	if (v.pos.z < zbuffer[y][x])
+//	{
+//		
+//		Vector3 tex_color = Uint32ToVector(GetColor(v.tc.x, v.tc.y));
+//		
+//		Vector3 ld(cos(theta),1 , sin(theta));//light dir
+//		ld = Normalize(ld);
+//		Vector3 l(0.8, 0.8, 0.8);//light color
+//		Vector3 m(1.0, 1.0, 1.0);//material
+//		Vector3 n = Normalize(v.normal);
+//
+//		Vector3 diffuse = Modulate(l, tex_color) * max(Dot(ld, n), 0);
+//
+//		g_frame_buffer[y][x] = RGB(diffuse.z*255, 
+//			diffuse.y * 255, 
+//			diffuse.x * 255);
+//		zbuffer[y][x] = v.pos.z;
+//	}
+//	return true;
+//}
 
 void DrawLine(int x0, int y0, int x1, int y1, COLORREF color)
 {
@@ -280,190 +238,44 @@ void DrawLine(Vertex p0, Vertex p1, COLORREF color)
 		}
 	}
 }
-void DrawXScanline(Vertex a, Vertex b)
-{
-	for (float x = a.pos.x; x <= b.pos.x; x++)
-	{
-		float grad = (x - a.pos.x) / (b.pos.x - a.pos.x);
-		if (isnan(grad) || grad < 0)
-			continue;
-		Vertex v = Interpolate(a, b, grad);
-		SetPixel(v);
-	}
-}
-
-void DrawTriA(Vertex top, Vertex left, Vertex right)
-{
-	/*
-	top
-	|\
-	| \
-	|  \
-	|___\
-	left right
-	*/
-	//if (abs(left.pos.y - top.pos.y) < 1 || abs(right.pos.y - top.pos.y) < 1)
-	//	return;
-	for (int y = left.pos.y; y <= top.pos.y; y++)
-	{
-		float grad = (y - left.pos.y) / (top.pos.y - left.pos.y);
-		if (grad < 0)
-			continue;
-		Vertex lv = Interpolate(left, top, grad);
-		Vertex rv = Interpolate(right, top, grad);
-
-		DrawXScanline(lv, rv);
-	}
-}
-void DrawTriV(Vertex bottom, Vertex left, Vertex right)
-{
-	/*
-	left  right
-	_____
-	|   /
-	|  /
-	| /
-	|/
-	bottom
-	*/
-	//if (abs(left.pos.y - bottom.pos.y) < 1 || abs(right.pos.y - bottom.pos.y) < 1)
-	//	return;
-	for (int y = bottom.pos.y; y <= left.pos.y; y++)
-	{
-		float grad = (y - bottom.pos.y) / (left.pos.y - bottom.pos.y);
-		if (grad < 0)
-			continue;
-		Vertex lv = Interpolate(bottom, left, grad);
-		Vertex rv = Interpolate(bottom, right, grad);
-
-		DrawXScanline(lv, rv);
-	}
-}
 
 void CPMRenderer::Draw()
 {
 	//DrawLine(10, 100, 300, 40, RED);
 	auto obj = scene->obj_list[0];
+
+	Vector4 viewpoint, target, up;
+	viewpoint.SetVector(20 * cos(obj->rotaY), obj->rotaX, 20 * sin(obj->rotaY), 1);
+	target.SetVector(0, 0, 0, 1);
+	up.SetVector(0, 1, 0, 0);
+	matrix view = LooAtMat(viewpoint, target, up);
+	float size = obj->size;
+	matrix world = ScalMat(size, size, size);
+
+	VS.world = world;
+	VS.view = view;
+	VS.Shading(obj->pos_list, obj->index_list, obj->tex_list, obj->normal_list);
 	
-	auto pos_list = obj->pos_list;
-	std::vector<Vector4> pos_buffer;
-	pos_buffer.resize(pos_list.size());
-
-	std::vector<Vector4> normal_buffer;
-	normal_buffer.resize(obj->normal_list.size());
-
-	auto index_list=obj->index_list;
-
-
-	//World -> View -> Projection 
-	for (int i = 0; i < pos_list.size(); i++)
-	{
-		matrix wvp;
-		Vector4 viewpoint, target, up;
-		viewpoint.SetVector(20*cos(obj->rotaY), obj->rotaX, 20*sin(obj->rotaY), 1);
-		target.SetVector(0, 0, 0, 1);
-		up.SetVector(0, 1, 0, 0);
-		matrix view = LooAtMat(viewpoint, target, up);
-		matrix proj = ProjMat(3.1415926f * 0.1f, 800.0f / 800.0f, 1.0f, 500.0f);
-		float size = obj->size;
-		matrix scal = ScalMat(size, size, size);
-
-
-		matrix rotaX = RotaXMat(0);
-		matrix rotaY = RotaYMat(0);
-
-		Vector4 tmp(pos_list[i], 1);
-		pos_buffer[i] = Mul(tmp, scal);
-		pos_buffer[i] = Mul(pos_buffer[i], rotaX);
-		pos_buffer[i] = Mul(pos_buffer[i], rotaY);
-		pos_buffer[i] = Mul(pos_buffer[i], view);
-		pos_buffer[i] = Mul(pos_buffer[i], proj);
-
-
-		//perspective divsion
-		pos_buffer[i].x = pos_buffer[i].x / pos_buffer[i].w;
-		pos_buffer[i].y = pos_buffer[i].y / pos_buffer[i].w;
-		pos_buffer[i].z = pos_buffer[i].z / pos_buffer[i].w;
-		pos_buffer[i].w = pos_buffer[i].w / pos_buffer[i].w;
-
-		//screen mapping
-		pos_buffer[i].x = pos_buffer[i].x * 100.0f + 800 / 2;
-		pos_buffer[i].y = -pos_buffer[i].y * 100.0f + 600 / 2;
-
-	}
-
+	
+	auto index_list = obj->index_list;
 	if (mode == WIRE_FRAME)
 	{
-		for (int i = 0; i < index_list.size(); i += 3)
+		for (int i = 0; i < obj->index_list.size(); i += 3)
 		{
-			DrawLine(pos_buffer[index_list[i].pos], pos_buffer[index_list[i + 1].pos], RED);
-			DrawLine(pos_buffer[index_list[i + 1].pos], pos_buffer[index_list[i + 2].pos], RED);
-			DrawLine(pos_buffer[index_list[i].pos], pos_buffer[index_list[i + 2].pos], RED);
+			DrawLine(VS.pos_buffer[index_list[i].pos].first, VS.pos_buffer[index_list[i + 1].pos].first, RED);
+			DrawLine(VS.pos_buffer[index_list[i + 1].pos].first, VS.pos_buffer[index_list[i + 2].pos].first, RED);
+			DrawLine(VS.pos_buffer[index_list[i].pos].first, VS.pos_buffer[index_list[i + 2].pos].first, RED);
 		}
 	}
 	if (mode == CONSTANT_COLOR)
 	{
-		for (int i = 0; i < index_list.size(); i += 3)
-		{
-			Vertex a, b, c;
-			a.pos = pos_buffer[index_list[i].pos];
-			b.pos = pos_buffer[index_list[i + 1].pos];
-			c.pos = pos_buffer[index_list[i + 2].pos];
-
-			a.tc = obj->tex_list[index_list[i].tex];
-			b.tc = obj->tex_list[index_list[i+1].tex];
-			c.tc = obj->tex_list[index_list[i+2].tex];
-
-			a.normal = obj->normal_list[index_list[i].normal];
-			b.normal = obj->normal_list[index_list[i + 1].normal];
-			c.normal = obj->normal_list[index_list[i + 2].normal];
-
-			//判断绕序
-			Vector4 e0 = a.pos - b.pos;
-			Vector4 e1 = c.pos - b.pos;
-			Vector4 n = Normalize(Cross(e0, e1));
-			Vector4 eyesight = { 0,0,1,0 };
-			if (Dot(eyesight, n) > 0)//同向,需要剔除
-				continue;
-
-			if (a.pos.y < b.pos.y)
-				swap(a, b);
-			if (a.pos.y < c.pos.y)
-				swap(a, c);
-			if (b.pos.y < c.pos.y)
-				swap(b, c);
-			Vertex d;
-			float grad = (b.pos.y-c.pos.y) / (a.pos.y-c.pos.y);
-
-			d = Interpolate(c, a, grad);
-			if (b.pos.x > d.pos.x)
-			{
-				/*
-				a
-				| \
-				d	b
-				| /
-				c
-				*/
-				DrawTriA(a, d, b);
-				DrawTriV(c, d, b);
-			}
-			else
-			{
-				/*
-					a
-				  /	|
-				b	d
-				  \	|
-					c
-				*/
-				DrawTriA(a, b, d);
-				DrawTriV(c, b, d);
-			}
-		}
+		Vector3 cam(viewpoint.x, viewpoint.y, viewpoint.z);
+		PS->camPos = cam;
+		PS->Shading(VS.fragment_buffer);
 	}
 	if (mode == TEXTURE)
 	{
 
 	}
+	VS.fragment_buffer.clear();
 }
