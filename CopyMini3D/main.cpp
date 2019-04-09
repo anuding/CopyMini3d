@@ -19,7 +19,7 @@ int main() {
 	CPMScene scene;
 	CPMGameObject* tri=new CPMGameObject();
 	//tri->InitAsCube();
-	tri->InitFromObj("Sphere1.obj");//Sphere1 Cube bunny_c4d_less
+	tri->InitFromObj("Sphere1.obj");//Sphere1 SphereDetailed.obj Cube bunny_c4d_less
 	//tri->InitAsTriangle();
 	scene.AddGameObject(tri);
 	CPMRenderer renderer(scene,device);

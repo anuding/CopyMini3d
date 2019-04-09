@@ -120,8 +120,8 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 			Vector3 F0(0.04f, 0.04f, 0.04f);
 			Vector3 albedo(0.5,0.0,0.0);
 			float ao = 1.0f;
-			float metallic = 3.0f / 7.0f;
-			float roughness = 3.0f / 7.0f;
+			float metallic = 5.0f / 7.0f;
+			float roughness = 1.0f / 7.0f;
 			//F0 = mix(F0, albedo, metallic);
 			F0 = F0 + (albedo - F0)*metallic;
 			// reflectance equation
