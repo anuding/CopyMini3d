@@ -13,7 +13,7 @@
 
 3. 使用贴图的PBR
 
-<img src="img\texture_filtering\双线性插值2.png" height="200px"/>
+<img src="img\texture_filtering\Bilinear_filtering2.PNG" height="200px"/>
 
  
 
