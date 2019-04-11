@@ -6,6 +6,7 @@
 #include <vector>
 using namespace std;
 typedef unsigned int IUINT32;
+typedef vector<vector<unsigned int>> texture;
 class PixelShader :
 	public Shader
 {
@@ -18,10 +19,15 @@ public:
 	unsigned int **frame_buffer;
 	float **zbuffer;
 	Vector3 camPos;
-	vector<vector<unsigned int>> albedo;// , roughness, metallic, ao;
+
+	texture albedo;// , roughness, metallic, ao;
+	texture roughness;
+	texture metallic;
+	texture ao;
+
 	void LoadTextures(vector<const char*> filenames);
-	void decodeOneStep(const char* filename);
-	Vector3 Uint32ToVector(IUINT32 color);
-	IUINT32 GetColor(float u, float v);
+	void decodeOneStep(const char* filename, vector<vector<unsigned int>>& tex);
+
+	Vector3 GetColor(texture& tex, float u, float v);
 };
 

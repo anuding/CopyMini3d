@@ -41,7 +41,11 @@ CPMRenderer::CPMRenderer(CPMScene& _scene, CPMDevice& _device)
 	PS = new PixelShader(g_frame_buffer, zbuffer);
 
 	vector<const char*> texture_names(4);
-	texture_names[0] = "test.png";
+	//texture_names[0] = "test.png"; //rustediron2_basecolor.png
+	texture_names[0] = "rustediron2_basecolor.png";
+	texture_names[1] = "rustediron2_roughness.png";
+	texture_names[2] = "rustediron2_metallic.png";
+	texture_names[3] = "white.png";
 	PS->LoadTextures(texture_names);
 }
 

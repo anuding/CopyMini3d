@@ -45,7 +45,7 @@ PixelShader::PixelShader(unsigned int ** _frame_buffer, float ** _zbuffer)
 PixelShader::~PixelShader()
 {
 }
-void PixelShader::decodeOneStep(const char* filename)
+void PixelShader::decodeOneStep(const char* filename, vector<vector<unsigned int>>& tex)
 {
 	std::vector<unsigned char> image; //the raw pixels
 	unsigned width, height;
@@ -54,9 +54,14 @@ void PixelShader::decodeOneStep(const char* filename)
 	unsigned error = lodepng::decode(image, width, height, filename);
 
 	//if there's an error, display it
-	if (error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
-	albedo.resize(height);
-	for (auto& i : albedo)
+	if (error)
+	{
+		std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+
+	}
+		
+	tex.resize(height);
+	for (auto& i : tex)
 	{
 		i.resize(width);
 	}
@@ -68,37 +73,55 @@ void PixelShader::decodeOneStep(const char* filename)
 		//texture.push_back(tmp);
 		for (int j = 0; j < height; j++)
 		{
-			albedo[i][j] = RGB(image[cnt], image[cnt + 1], image[cnt + 2]);
+			tex[i][j] = RGB(image[cnt], image[cnt + 1], image[cnt + 2]);
 			cnt += 4;
 		}
 	}
 }
 
-IUINT32 PixelShader::GetColor(float u, float v)
+Vector3 ToRGB(texture& tex, int x, int y)
 {
-	if (u < 0 || v < 0 || isnan(u) || isnan(v))
-	{
-		cout << "u: " << u << ", v: " << v << endl;
-		COLORREF cr = RGB(0, 0, 0);
-		return cr;
-	}
-
-	int x = u * 255.0f;
-	int y = v * 255.0f;
-	IUINT32 color = albedo[x][y];
-	return color;
-}
-
-Vector3 PixelShader::Uint32ToVector(IUINT32 color)
-{
+	IUINT32 color = tex[x][y];
 	BYTE r = color;
 	BYTE g = color >> 8;
 	BYTE b = color >> 16;
 	BYTE a = color >> 24;
-
 	Vector3 ans(r / 255.0f, g / 255.0f, b / 255.0f);
 	return ans;
 }
+
+Vector3 PixelShader::GetColor(texture& tex,float u, float v)
+{
+	if (u < 0 || v < 0 || isnan(u) || isnan(v))
+	{
+		cout << "u: " << u << ", v: " << v << endl;
+		return Vector3(0,0,0);
+	}
+
+	int ulen = tex.size() - 1;
+	int vlen = tex[0].size() - 1;
+
+	u = u * ulen;
+	v = v * ulen;
+
+	int ul = u;
+	int ur = (ul != ulen) ? ul + 1 : ul;
+	int vl = v;
+	int vr = (vl != vlen) ? vl + 1 : vl;
+
+	Vector3 ulvr, urvr, ulvl, urvl, down, top,ans;
+	ulvr = ToRGB(tex, ul, vr);
+	urvr = ToRGB(tex, ur, vr);
+	ulvl = ToRGB(tex, ul, vl);
+	urvl = ToRGB(tex, ur, vl);
+	down = ulvr * (1.0f - u + (float)ul) + urvr * (u - (float)ul);
+	top = ulvl * (1.0f - u + (float)ul) + urvl * (u - (float)ul);
+	ans= down * (1.0f - v + (float)vl) + top * (v - (float)vl);
+
+	return ans;
+}
+
+
 
 void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 {
@@ -110,6 +133,7 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 
 		if (isnan(v.screen_pos.z))
 			continue;
+		
 		if (v.screen_pos.z < zbuffer[y][x])//
 		{
 			Vector3 N = Normalize(v.normal);
@@ -118,12 +142,15 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 			// calculate reflectance at Normal incidence; if dia-electric (like plastic) use F0 
 			// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 			Vector3 F0(0.04f, 0.04f, 0.04f);
-			Vector3 albedo(0.5,0.0,0.0);
-			float ao = 1.0f;
-			float metallic = 5.0f / 7.0f;
-			float roughness = 1.0f / 7.0f;
+			
+			Vector3 albedo_value = GetColor(albedo, v.tex.x, v.tex.y);
+			albedo_value.SetVector(pow(albedo_value.x, 2.2f), pow(albedo_value.y, 2.2f), pow(albedo_value.z, 2.2f));
+			float roughness_value = GetColor(roughness, v.tex.x, v.tex.y).x;
+			float metallic_value = GetColor(metallic, v.tex.x, v.tex.y).x;
+			float ao_value = GetColor(ao, v.tex.x, v.tex.y).x;
+
 			//F0 = mix(F0, albedo, metallic);
-			F0 = F0 + (albedo - F0)*metallic;
+			F0 = F0 + (albedo_value - F0)*metallic_value;
 			// reflectance equation
 			Vector3 Lo;
 			for (int i = 0; i < 4; ++i)
@@ -136,8 +163,8 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 				Vector3 radiance = lightColors[i] * attenuation;
 
 				// Cook-Torrance BRDF
-				float NDF = DistributionGGX(N, H, roughness);
-				float G = GeometrySmith(N, V, L, roughness);
+				float NDF = DistributionGGX(N, H, roughness_value);
+				float G = GeometrySmith(N, V, L, roughness_value);
 				Vector3 F = fresnelSchlick(Clamp(Dot(H, V), 0.0, 1.0), F0);
 
 				Vector3 nominator = NDF * G * F;
@@ -153,16 +180,16 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 				// multiply kD by the inverse metalness such that only non-metals 
 				// have diffuse lighting, or a linear blend if partly metal (pure metals
 				// have no diffuse light).
-				kD = kD*(1.0 - metallic);
+				kD = kD*(1.0 - metallic_value);
 
 				// scale light by NdotL
 				float NdotL = max(Dot(N, L), 0.0);
 
 				// add to outgoing radiance Lo
-				Lo = Lo+ Modulate((Modulate(kD, albedo) * (1/PI) + specular), radiance) * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+				Lo = Lo+ Modulate((Modulate(kD, albedo_value) * (1/PI) + specular), radiance) * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 			}
 
-			Vector3 ambient = Modulate(Vector3(0.03, 0.03, 0.03) , albedo) * ao;
+			Vector3 ambient = Modulate(Vector3(0.03, 0.03, 0.03) , albedo_value) * ao_value;
 
 			Vector3 color = ambient + Lo;
 
@@ -182,7 +209,10 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 
 void PixelShader::LoadTextures(vector<const char*> filenames)
 {
-	decodeOneStep(filenames[0]);
+	decodeOneStep(filenames[0], albedo);
+	decodeOneStep(filenames[1], roughness);
+	decodeOneStep(filenames[2], metallic);
+	decodeOneStep(filenames[3], ao);
 }
 //Vector3 tex_color = Uint32ToVector(GetColor(v.tex.x, v.tex.y));
 //float theta = 0;
