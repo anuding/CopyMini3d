@@ -1,5 +1,5 @@
 #include "VertexShader.h"
-
+#include <iostream>
 
 
 VertexShader::VertexShader()
@@ -11,6 +11,8 @@ VertexShader::VertexShader()
 VertexShader::~VertexShader()
 {
 }
+
+
 
 void VertexShader::Shading(
 	vector<Vector3>& pos_list,
@@ -45,6 +47,7 @@ void VertexShader::Shading(
 
 	for (int i = 0; i < index_list.size(); i += 3)
 	{
+		
 		Fragment a, b, c;
 		a.world_pos = pos_buffer[index_list[i].pos].second;
 		b.world_pos = pos_buffer[index_list[i + 1].pos].second;
@@ -63,15 +66,30 @@ void VertexShader::Shading(
 		c.tex = tex_list[index_list[i + 2].tex];
 
 
+
+
+
 		//判断绕序
-		//Vector4 e0(a.screen_pos - b.screen_pos, 0);
-		//Vector4 e1(c.screen_pos - b.screen_pos, 0);
-		Vector4 e0=a.screen_pos - b.screen_pos;
-		Vector4 e1=c.screen_pos - b.screen_pos;
-		Vector4 n = Normalize(Cross(e0, e1));
-		Vector4 eyesight = { 0,0,1,0 };
-		if (Dot(eyesight, n) > 0)//同向,需要剔除
-			continue;
+
+		if (culling_mode == BACKFACE)
+		{
+			Vector4 e0(a.world_pos - b.world_pos, 0);
+			Vector4 e1(c.world_pos - b.world_pos, 0);
+			Vector4 n = Normalize(Cross(e0, e1));
+			Vector4 eyesight(viewpoint.x, viewpoint.y, viewpoint.z, 0);
+			if (Dot(eyesight, n) < 0)//同向,需要剔除
+				continue;
+		}
+		else if (culling_mode == FRONTFACE)
+		{
+			Vector4 e0(a.world_pos - b.world_pos, 0);
+			Vector4 e1(c.world_pos - b.world_pos, 0);
+			Vector4 n = Normalize(Cross(e0, e1));
+			Vector4 eyesight(viewpoint.x, viewpoint.y, viewpoint.z, 0);
+			if (Dot(eyesight, n) > 0)//同向,需要剔除
+				continue;
+		}
+
 
 		if (a.screen_pos.y < b.screen_pos.y)
 			swap(a, b);
@@ -79,6 +97,7 @@ void VertexShader::Shading(
 			swap(a, c);
 		if (b.screen_pos.y < c.screen_pos.y)
 			swap(b, c);
+
 		Fragment d;
 		float grad = (b.screen_pos.y - c.screen_pos.y) / (a.screen_pos.y - c.screen_pos.y);
 
@@ -118,7 +137,9 @@ void VertexShader::Scanline(Fragment a, Fragment b)
 		if (isnan(grad) || grad < 0)
 			continue;
 		Fragment v = Interpolate(a, b, grad);
-		fragment_buffer.push_back(v);
+		//fragment_buffer.push_back(v);
+		fragment_buffer.emplace_back(v);
+
 	}
 }
 

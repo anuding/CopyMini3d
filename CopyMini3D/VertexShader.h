@@ -3,6 +3,14 @@
 #include "Geometry.h"
 #include <vector>
 using namespace std;
+
+enum CULLING
+{
+	BACKFACE = 0,
+	FRONTFACE = 1,
+	NONE = 2
+};
+
 class VertexShader :
 	public Shader
 {
@@ -15,7 +23,9 @@ public:
 		vector<Vector3>& tex_list,
 		vector<Vector3>& normal_list);
 public://In resource
+	Vector4 viewpoint;
 	matrix world, view, proj;
+	CULLING culling_mode= BACKFACE;
 public://Out
 	std::vector<Fragment> fragment_buffer;//screen_pos tex normal
 	std::vector<pair<Vector4, Vector3>> pos_buffer;

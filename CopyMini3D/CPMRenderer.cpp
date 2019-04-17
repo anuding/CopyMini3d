@@ -1,4 +1,5 @@
 #include "CPMRenderer.h"
+#include "CPMLight.h"
 #include <iostream>
 #define RGBA(r,g,b,a)   ((COLORREF) ((uint8_t)(a)<<24)|\
 									((uint8_t)(r)<<16|\
@@ -41,10 +42,17 @@ CPMRenderer::CPMRenderer(CPMScene& _scene, CPMDevice& _device)
 	PS = new PixelShader(g_frame_buffer, zbuffer);
 
 	vector<const char*> texture_names(4);
-	//texture_names[0] = "test.png"; //rustediron2_basecolor.png
-	texture_names[0] = "rustediron2_basecolor.png";
-	texture_names[1] = "rustediron2_roughness.png";
-	texture_names[2] = "rustediron2_metallic.png";
+	texture_names[0] = "test.png";
+
+	texture_names[0] = "../res/rustediron1-alt2-Unreal-Engine/rustediron2_basecolor.png";
+	//texture_names[0] = "../res/skybox/left.png";
+	texture_names[1] = "../res/rustediron1-alt2-Unreal-Engine/rustediron2_roughness.png";
+	texture_names[2] = "../res/rustediron1-alt2-Unreal-Engine/rustediron2_metallic.png";
+	texture_names[3] = "white.png";
+
+	//texture_names[0] = "../res/Copper-scuffed_Unreal-Engine/Copper-scuffed_basecolor.png";
+	//texture_names[1] = "../res/Copper-scuffed_Unreal-Engine/Copper-scuffed_roughness.png";
+	//texture_names[2] = "../res/Copper-scuffed_Unreal-Engine/Copper-scuffed_metallic.png";
 	texture_names[3] = "white.png";
 	PS->LoadTextures(texture_names);
 }
@@ -256,11 +264,13 @@ void CPMRenderer::Draw()
 	float size = obj->size;
 	matrix world = ScalMat(size, size, size);
 
+	VS.viewpoint = target - viewpoint;
 	VS.world = world;
 	VS.view = view;
 	VS.Shading(obj->pos_list, obj->index_list, obj->tex_list, obj->normal_list);
-	
-	
+	VS.culling_mode = BACKFACE;
+	//VS.culling_mode = FRONTFACE;
+
 	auto index_list = obj->index_list;
 	if (mode == WIRE_FRAME)
 	{
@@ -274,7 +284,10 @@ void CPMRenderer::Draw()
 	if (mode == CONSTANT_COLOR)
 	{
 		Vector3 cam(viewpoint.x, viewpoint.y, viewpoint.z);
+		CPMLight light;
+		light.theta = theta;
 		PS->camPos = cam;
+		PS->light = light;
 		PS->Shading(VS.fragment_buffer);
 	}
 	if (mode == TEXTURE)

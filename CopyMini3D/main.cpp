@@ -48,7 +48,7 @@ int main() {
 		{
 			rox = 0;
 			roy = 0;
-			tri->size=3000.0f / 100.0f;
+			tri->size=3.0f / 100.0f;
 		}
 		if (screen_keys[VK_TAB]) 
 		{

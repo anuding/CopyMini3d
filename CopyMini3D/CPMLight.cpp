@@ -4,6 +4,7 @@
 
 CPMLight::CPMLight()
 {
+	theta = 0;
 }
 
 

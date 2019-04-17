@@ -270,3 +270,4 @@ PhysX/
 
 # Assets
 *.bin
+/res

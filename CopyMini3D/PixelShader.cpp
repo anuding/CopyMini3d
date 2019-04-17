@@ -1,6 +1,7 @@
 #include "PixelShader.h"
 #include <Windows.h>
 #include "PBR.h"
+#include <thread>
 #define RGBA(r,g,b,a)   ((COLORREF) ((uint8_t)(a)<<24)|\
 									((uint8_t)(r)<<16|\
 									((uint8_t)(g)<<8)|\
@@ -121,9 +122,7 @@ Vector3 PixelShader::GetColor(texture& tex,float u, float v)
 	return ans;
 }
 
-
-
-void PixelShader::Shading(vector<Fragment> & fragment_buffer)
+void PixelShader::PBRShading(vector<Fragment> & fragment_buffer)
 {
 	for (auto& v : fragment_buffer)
 	{
@@ -133,7 +132,7 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 
 		if (isnan(v.screen_pos.z))
 			continue;
-		
+
 		if (v.screen_pos.z < zbuffer[y][x])//
 		{
 			Vector3 N = Normalize(v.normal);
@@ -142,7 +141,7 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 			// calculate reflectance at Normal incidence; if dia-electric (like plastic) use F0 
 			// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 			Vector3 F0(0.04f, 0.04f, 0.04f);
-			
+
 			Vector3 albedo_value = GetColor(albedo, v.tex.x, v.tex.y);
 			albedo_value.SetVector(pow(albedo_value.x, 2.2f), pow(albedo_value.y, 2.2f), pow(albedo_value.z, 2.2f));
 			float roughness_value = GetColor(roughness, v.tex.x, v.tex.y).x;
@@ -169,7 +168,7 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 
 				Vector3 nominator = NDF * G * F;
 				float denominator = 4 * max(Dot(N, V), 0.0) * max(Dot(N, L), 0.0);
-				Vector3 specular = nominator * (1/max(denominator, 0.001)); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
+				Vector3 specular = nominator * (1 / max(denominator, 0.001)); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
 
 				// kS is equal to Fresnel
 				Vector3 kS = F;
@@ -180,16 +179,16 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 				// multiply kD by the inverse metalness such that only non-metals 
 				// have diffuse lighting, or a linear blend if partly metal (pure metals
 				// have no diffuse light).
-				kD = kD*(1.0 - metallic_value);
+				kD = kD * (1.0 - metallic_value);
 
 				// scale light by NdotL
 				float NdotL = max(Dot(N, L), 0.0);
 
 				// add to outgoing radiance Lo
-				Lo = Lo+ Modulate((Modulate(kD, albedo_value) * (1/PI) + specular), radiance) * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+				Lo = Lo + Modulate((Modulate(kD, albedo_value) * (1 / PI) + specular), radiance) * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 			}
 
-			Vector3 ambient = Modulate(Vector3(0.03, 0.03, 0.03) , albedo_value) * ao_value;
+			Vector3 ambient = Modulate(Vector3(0.03, 0.03, 0.03), albedo_value) * ao_value;
 
 			Vector3 color = ambient + Lo;
 
@@ -207,6 +206,76 @@ void PixelShader::Shading(vector<Fragment> & fragment_buffer)
 	}
 }
 
+void ConstantShading(
+	const vector<Fragment> & fragment_buffer,
+	int start,
+	int end,
+	PixelShader* p)
+{
+	for (int i=start;i<end;i++)
+	{
+		auto v = fragment_buffer[i];
+		if (v.screen_pos.x >= 800 || v.screen_pos.x <= 0 || v.screen_pos.y >= 600 || v.screen_pos.y <= 0)
+			continue;
+		int x = v.screen_pos.x, y = v.screen_pos.y;
+
+		if (isnan(v.screen_pos.z))
+			continue;
+
+		if (v.screen_pos.z < p->zbuffer[y][x])//
+		{
+			Vector3 tex_color = p->GetColor(p->albedo, v.tex.x, v.tex.y);
+			Vector3 diffuse = tex_color;
+
+			p->frame_buffer[y][x] = RGB(diffuse.z * 255,
+				diffuse.y * 255,
+				diffuse.x * 255);
+			p->zbuffer[y][x] = v.screen_pos.z;
+		}
+	}
+}
+
+void PixelShader::LightShading(vector<Fragment> & fragment_buffer)
+{
+	for (auto& v : fragment_buffer)
+	{
+		if (v.screen_pos.x >= 800 || v.screen_pos.x <= 0 || v.screen_pos.y >= 600 || v.screen_pos.y <= 0)
+			continue;
+		int x = v.screen_pos.x, y = v.screen_pos.y;
+
+		if (isnan(v.screen_pos.z))
+			continue;
+
+		if (v.screen_pos.z < zbuffer[y][x])//
+		{
+			Vector3 tex_color = GetColor(albedo, v.tex.x, v.tex.y);
+			float theta = light.theta;
+			Vector3 ld(cos(theta), 1, sin(theta));//light dir
+			ld = Normalize(ld);
+			Vector3 l(0.8, 0.8, 0.8);//light color
+			Vector3 m(1.0, 1.0, 1.0);//material
+			Vector3 n = Normalize(v.normal);
+
+			Vector3 diffuse = Modulate(l, tex_color) * max(Dot(ld, n), 0);
+			//diffuse.SetVector(v.normal.x, v.normal.y, v.normal.z);
+			//diffuse.SetVector(1, 0, 0);
+			frame_buffer[y][x] = RGB(diffuse.z * 255,
+				diffuse.y * 255,
+				diffuse.x * 255);
+			zbuffer[y][x] = v.screen_pos.z;
+		}
+	}
+}
+
+void PixelShader::Shading(vector<Fragment> & fragment_buffer)
+{
+	int len = fragment_buffer.size();
+	//ConstantShading(fragment_buffer,0,len, this);
+	PBRShading(fragment_buffer);
+	//LightShading(fragment_buffer);
+	
+}
+
 void PixelShader::LoadTextures(vector<const char*> filenames)
 {
 	decodeOneStep(filenames[0], albedo);
@@ -214,17 +283,3 @@ void PixelShader::LoadTextures(vector<const char*> filenames)
 	decodeOneStep(filenames[2], metallic);
 	decodeOneStep(filenames[3], ao);
 }
-//Vector3 tex_color = Uint32ToVector(GetColor(v.tex.x, v.tex.y));
-//float theta = 0;
-//Vector3 ld(cos(theta), 1, sin(theta));//light dir
-//ld = Normalize(ld);
-//Vector3 l(0.8, 0.8, 0.8);//light color
-//Vector3 m(1.0, 1.0, 1.0);//material
-//Vector3 n = Normalize(v.normal);
-//
-//Vector3 diffuse = Modulate(l, m) * max(Dot(ld, n), 0);
-//
-//frame_buffer[y][x] = RGB(diffuse.z * 255,
-//	diffuse.y * 255,
-//	diffuse.x * 255);
-//zbuffer[y][x] = v.screen_pos.z;
