@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CopyMini3D", "CopyMini3D\CopyMini3D.vcxproj", "{7CF1B837-E7BD-493D-9DD4-ACAC71CD1297}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "RayTracer\RayTracer.vcxproj", "{B165F4CE-E600-4DA4-BF28-26245ED6072C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiThreads", "MultiThreads\MultiThreads.vcxproj", "{FADBD0E9-FCC7-48A9-A344-5E84D2C472FC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUITest", "GUITest\GUITest.vcxproj", "{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,14 @@ Global
 		{FADBD0E9-FCC7-48A9-A344-5E84D2C472FC}.Release|x64.Build.0 = Release|x64
 		{FADBD0E9-FCC7-48A9-A344-5E84D2C472FC}.Release|x86.ActiveCfg = Release|Win32
 		{FADBD0E9-FCC7-48A9-A344-5E84D2C472FC}.Release|x86.Build.0 = Release|Win32
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Debug|x64.ActiveCfg = Debug|x64
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Debug|x64.Build.0 = Debug|x64
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Debug|x86.ActiveCfg = Debug|Win32
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Debug|x86.Build.0 = Debug|Win32
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Release|x64.ActiveCfg = Release|x64
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Release|x64.Build.0 = Release|x64
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Release|x86.ActiveCfg = Release|Win32
+		{62D258F3-DE6D-4EB5-96B6-2C30CE12F61E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
