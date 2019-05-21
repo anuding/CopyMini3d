@@ -69,14 +69,30 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir)3rd\inc;E:\Code_Proj\CG_Proj\OpenGL\GL_ENV\MYGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)3rd\lib\debug;E:\Code_Proj\CG_Proj\OpenGL\GL_ENV\MYGL\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>E:\Code_Proj\CG_Proj\OpenGL\GL_ENV\MYGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\Code_Proj\CG_Proj\OpenGL\GL_ENV\MYGL\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(ProjectDir)\3rd\inc;E:\Code_Proj\CG_Proj\OpenGL\GL_ENV\MYGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\3rd\lib\release;E:\Code_Proj\CG_Proj\OpenGL\GL_ENV\MYGL\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -95,10 +111,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -117,40 +136,60 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="core.h" />
-    <ClInclude Include="CPMCamera.h" />
-    <ClInclude Include="CPMGameObject.h" />
-    <ClInclude Include="CPMLight.h" />
-    <ClInclude Include="CPMRenderer.h" />
-    <ClInclude Include="CPMScene.h" />
+    <ClInclude Include="Component.h" />
     <ClInclude Include="Geometry.h" />
-    <ClInclude Include="matrix.h" />
-    <ClInclude Include="CPMDevice.h" />
-    <ClInclude Include="PBR.h" />
-    <ClInclude Include="PixelShader.h" />
-    <ClInclude Include="render.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="VertexShader.h" />
+    <ClInclude Include="GLMHeader.h" />
+    <ClInclude Include="GUI.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="EngineCore.h" />
+    <ClInclude Include="GLHeader.h" />
+    <ClInclude Include="imconfig.h" />
+    <ClInclude Include="imgui.h" />
+    <ClInclude Include="imgui_impl_glfw.h" />
+    <ClInclude Include="imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui_internal.h" />
+    <ClInclude Include="imstb_rectpack.h" />
+    <ClInclude Include="imstb_textedit.h" />
+    <ClInclude Include="imstb_truetype.h" />
+    <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshFilter.h" />
+    <ClInclude Include="MeshRenderer.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="RenderSys.h" />
+    <ClInclude Include="RigidBody.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Singleton.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core.cpp" />
-    <ClCompile Include="CPMCamera.cpp" />
-    <ClCompile Include="CPMDevice.cpp" />
-    <ClCompile Include="CPMGameObject.cpp" />
-    <ClCompile Include="CPMLight.cpp" />
-    <ClCompile Include="CPMRenderer.cpp" />
-    <ClCompile Include="CPMScene.cpp" />
-    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="GUI.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="EngineCore.cpp" />
+    <ClCompile Include="glad.c" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="matrix.cpp" />
-    <ClCompile Include="PBR.cpp" />
-    <ClCompile Include="PixelShader.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="VertexShader.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshFilter.cpp" />
+    <ClCompile Include="MeshRenderer.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="RenderSys.cpp" />
+    <ClCompile Include="RigidBody.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Singleton.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="PixelShader.glsl" />
+    <None Include="VertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

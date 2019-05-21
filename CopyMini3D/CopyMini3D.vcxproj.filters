@@ -9,112 +9,216 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="3rd_party">
       <UniqueIdentifier>{e4699e14-57ce-4b83-98df-0d899cc3b729}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{a2557537-2325-453e-8d08-9d46c91709f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GLheaders">
+      <UniqueIdentifier>{382bd966-b153-4f11-ad6a-2f4ef049db7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine">
+      <UniqueIdentifier>{0b6b4b0e-5f7c-4a19-aa8d-33434fd290df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\EngineCore">
+      <UniqueIdentifier>{eedd88c3-39ab-41fc-9992-b6618042b039}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\SceneManager">
+      <UniqueIdentifier>{238381e8-326b-4257-8395-e3e8cba7bf0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Object">
+      <UniqueIdentifier>{0d69f3db-9467-45fd-9cb2-2d4312eb22f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Scene">
+      <UniqueIdentifier>{3461359f-f201-4361-9dbf-41b7d1a29dcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Components">
+      <UniqueIdentifier>{02c59a17-e32f-492c-89aa-d38713d7112f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Components\Transform">
+      <UniqueIdentifier>{df0d70ed-875b-492e-9a71-4ddd5e804aa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Components\RigidBody">
+      <UniqueIdentifier>{b5949ec6-a096-4be6-a2bd-14dbaba42639}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Components\MeshRenderer">
+      <UniqueIdentifier>{97e89f68-d78b-4dcb-8e77-56c106d6b0d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\TheOnlyOne">
+      <UniqueIdentifier>{93c76567-8e45-4467-ad38-ff9c3cd1ccb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Systems">
+      <UniqueIdentifier>{a0324d70-be71-41c3-bdb1-74ed6d0cd697}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders">
-      <UniqueIdentifier>{ae3486fd-a1b8-4b39-9066-b3a539f80666}</UniqueIdentifier>
+      <UniqueIdentifier>{95988e70-9d02-4282-94b3-a492c6804baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Garbage">
+      <UniqueIdentifier>{f147f8a6-3970-49ad-9c56-fdb4c0aec609}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Garbage\Mesh">
+      <UniqueIdentifier>{e762db0d-248a-48f7-888d-e6120f5baf26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Managers">
+      <UniqueIdentifier>{6ff12ee4-c7c5-4f3a-abb8-a5ff93be7d98}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imconfig.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="matrix.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui_impl_glfw.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="CPMDevice.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui_impl_opengl3.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="CPMGameObject.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="render.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="CPMRenderer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="CPMScene.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="CPMLight.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GLHeader.h">
+      <Filter>Header Files\GLheaders</Filter>
     </ClInclude>
-    <ClInclude Include="CPMCamera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Component.h">
+      <Filter>Header Files\Engine\Components</Filter>
     </ClInclude>
-    <ClInclude Include="PBR.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="MeshRenderer.h">
+      <Filter>Header Files\Engine\Components\MeshRenderer</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Shaders</Filter>
+    <ClInclude Include="RigidBody.h">
+      <Filter>Header Files\Engine\Components\RigidBody</Filter>
     </ClInclude>
-    <ClInclude Include="VertexShader.h">
-      <Filter>Shaders</Filter>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Engine\Components\Transform</Filter>
     </ClInclude>
-    <ClInclude Include="PixelShader.h">
-      <Filter>Shaders</Filter>
+    <ClInclude Include="EngineCore.h">
+      <Filter>Header Files\Engine\EngineCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Garbage\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshFilter.h">
+      <Filter>Header Files\Engine\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSys.h">
+      <Filter>Header Files\Engine\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>Header Files\Engine\TheOnlyOne</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Engine\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Geometry.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Header Files\Engine\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GLMHeader.h">
+      <Filter>Header Files\GLheaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CPMDevice.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CPMGameObject.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CPMScene.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CPMCamera.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CPMLight.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CPMRenderer.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="matrix.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\lodepng.cpp">
       <Filter>3rd_party</Filter>
     </ClCompile>
-    <ClCompile Include="PBR.cpp">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="imgui.cpp">
+      <Filter>Header Files\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Shaders</Filter>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>Header Files\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="VertexShader.cpp">
-      <Filter>Shaders</Filter>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>Header Files\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="PixelShader.cpp">
-      <Filter>Shaders</Filter>
+    <ClCompile Include="imgui_impl_glfw.cpp">
+      <Filter>Header Files\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Geometry.cpp">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="imgui_impl_opengl3.cpp">
+      <Filter>Header Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>Header Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Header Files\GLheaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Header Files\Engine\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderer.cpp">
+      <Filter>Header Files\Engine\Components\MeshRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidBody.cpp">
+      <Filter>Header Files\Engine\Components\RigidBody</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Header Files\Engine\Components\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore.cpp">
+      <Filter>Header Files\Engine\EngineCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Header Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI.cpp">
+      <Filter>Header Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Garbage\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshFilter.cpp">
+      <Filter>Header Files\Engine\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSys.cpp">
+      <Filter>Header Files\Engine\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Singleton.cpp">
+      <Filter>Header Files\Engine\TheOnlyOne</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Header Files\Engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Header Files\Engine\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="VertexShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="PixelShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

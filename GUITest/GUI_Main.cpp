@@ -54,6 +54,7 @@ int main(int, char**)
 
 	// Create window with graphics context
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+	
 	if (window == NULL)
 		return 1;
 	glfwMakeContextCurrent(window);
@@ -107,11 +108,12 @@ int main(int, char**)
 	//io.Fonts->AddFontFromFileTTF("res/Futura LT Bold.ttf", 10.0f);
 	ImFont* font = io.Fonts->AddFontFromFileTTF("../res/Futura LT Bold.ttf", 23.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	IM_ASSERT(font != NULL);
-
+	
 
 	// Main loop
 	while (!glfwWindowShouldClose(window)&&!io.KeysDown[256])
 	{
+		
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Poll and handle events (inputs, window resize, etc.)
@@ -289,6 +291,7 @@ void UpdateScene()
 {
 
 }
+
 void RenderScene()
 {
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -317,6 +320,23 @@ void RenderScene()
 	glVertex3f(-1, 1, 0);
 	glVertex3f(1, 1, 0);
 	glEnd();
-
+//	//int w, h;
+//#define	checkImageWidth 512
+//#define	checkImageHeight 512
+//
+//
+//	GLubyte checkImage[checkImageHeight][checkImageWidth][3];
+//	int i, j, c;
+//
+//	for (i = 0; i < checkImageHeight; i++) {
+//		for (j = 0; j < checkImageWidth; j++) {
+//			c = ((((i & 0x8) == 0) ^ ((j & 0x8)) == 0)) * 255;
+//			checkImage[i][j][0] = (GLubyte)c;
+//			checkImage[i][j][1] = (GLubyte)c;
+//			checkImage[i][j][2] = (GLubyte)c;
+//		}
+//	}
+//	glDrawPixels(checkImageWidth, checkImageHeight, GL_RGB,
+//			GL_UNSIGNED_BYTE, checkImage);
 	glFlush();
 }
